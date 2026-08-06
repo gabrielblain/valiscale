@@ -33,6 +33,16 @@
 #'   \item \code{R2} — Coefficient of determination (squared correlation)
 #' }
 #'
+#' @examples
+#' df <- data.frame(
+#'   Date = seq(as.Date("2000-01-01"), by = "day", length.out = 9496),
+#'   obs = rnorm(9496, mean = 20, sd = 3),
+#'   est = rnorm(9496, mean = 20, sd = 3)
+#' )
+#' testing_data <- aggregate_scale(df, scale = "daily", FUN = mean)
+#' agreement_stats(df=testing_data,
+#' by_year = TRUE)
+#'
 #' @export
 agreement_stats <- function(df, by_year = FALSE,
                             by_season = FALSE,
