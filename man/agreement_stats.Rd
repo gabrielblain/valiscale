@@ -54,3 +54,14 @@ estimated values. The function is designed to work directly with the output
 of \code{\link{aggregate_scale}}, allowing tracking across years, months, periods,
 or any multi-variate combination of them.
 }
+\examples{
+df <- data.frame(
+  Date = seq(as.Date("2000-01-01"), by = "day", length.out = 9496),
+  obs = rnorm(9496, mean = 20, sd = 3),
+  est = rnorm(9496, mean = 20, sd = 3)
+)
+testing_data <- aggregate_scale(df, scale = "daily", FUN = mean)
+agreement_stats(df=testing_data,
+by_year = TRUE)
+
+}
