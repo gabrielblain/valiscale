@@ -100,3 +100,17 @@ agreement_stats(df=pentad_means, by_season = TRUE)
 agreement_stats(df=seasonal_means, by_season = TRUE)
 ```
 
+## Example 5
+
+Great. Let's see if model performance varies across different months:
+
+```{r agreement mean-month}
+# Monthly performance for daily values
+agreement_stats(df = daily_data, by_month = TRUE)
+# Monthly performance for pentad values (5-day averages)
+agreement_stats(df = pentad_means, by_month = TRUE)
+# Monthly performance for seasonal values
+# Note: Since seasonal values are already aggregated into 3-month blocks,
+# attempting to compute monthly stats here will (correctly) throw an error/warning.
+agreement_stats(df = seasonal_means, by_month = TRUE)
+```
