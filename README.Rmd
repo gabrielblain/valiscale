@@ -1,0 +1,102 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# valiscale
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of valiscale is to calculate several metrics for quantitative characterization of estimation models performance.
+
+## Installation
+
+You can install the development version of valiscale from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("pak")
+pak::pak("gabrielblain/valiscale")
+```
+
+## Example 1
+
+Got paired daily data (like observed vs. estimated values) and need to aggregate it into common environmental time scales? Here is how to compute averages across daily, 5-day (pentad), and seasonal windows:
+
+```{r aggregate mean}
+library(valiscale)
+df <- data.frame(
+Date = seq(as.Date("2000-01-01"), by = "day", length.out = 9496),
+obs = rnorm(9496, mean = 20, sd = 3),
+est = rnorm(9496, mean = 20, sd = 3)
+)
+#Keeping daily:
+daily_data <- aggregate_scale(df, scale = "daily", FUN = mean)
+head(daily_data)
+#pentad (5-day periods):
+pentad_means <- aggregate_scale(df, scale = "pentad", FUN = mean)
+head(pentad_means)
+#seasonal (Austral seasons: DJF, MAM, JJA, SON):
+seasonal_means <- aggregate_scale(df, scale = "seasonal", FUN = mean)
+head(seasonal_means)
+```
+
+Note that averaging at the daily scale produces the same values as the input data.
+
+## Example 2
+
+If you need totals instead of averages, swap `FUN = mean` for `FUN = sum`:
+```{r aggregate sum}
+df <- data.frame(
+Date = seq(as.Date("2000-01-01"), by = "day", length.out = 9496),
+obs = rnorm(9496, mean = 20, sd = 3),
+est = rnorm(9496, mean = 20, sd = 3)
+)
+#Keeping daily:
+daily_data <- aggregate_scale(df, scale = "daily", FUN = sum)
+head(daily_data)
+#pentad (5-day periods):
+pentad_sum <- aggregate_scale(df, scale = "pentad", FUN = sum)
+head(pentad_sum)
+#seasonal (Austral seasons: DJF, MAM, JJA, SON):
+seasonal_sum <- aggregate_scale(df, scale = "seasonal", FUN = sum)
+head(seasonal_sum)
+```
+Note that summing at the daily scale produces the same values as the input data.
+
+## Example 3
+
+Now let's evaluate model performance across different time scales using the aggregated data from Example 1:
+
+```{r agreement mean}
+#Performance for daily values:
+agreement_stats(df=daily_data)
+#Performance for pentad values:
+agreement_stats(df=pentad_means)
+#Performance for seasonal values (Austral seasons: DJF, MAM, JJA, SON):
+agreement_stats(df=seasonal_means)
+```
+
+## Example 4
+
+Overall stats are great, but let's see if model performance varies across different seasons:
+
+```{r agreement mean-seasons}
+#Seasonal performance for daily values in the:
+agreement_stats(df=daily_data, by_season = TRUE)
+#Seasonal performance for pentad values:
+agreement_stats(df=pentad_means, by_season = TRUE)
+#Seasonal performance for seasonal values (Austral seasons: DJF, MAM, JJA, SON):
+agreement_stats(df=seasonal_means, by_season = TRUE)
+```
+
