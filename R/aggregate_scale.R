@@ -67,13 +67,10 @@ aggregate_scale <- function(df,
   ## Validation
   ##------------------------------------------------------------
 
-  if (!is.data.frame(df))
-    stop("'df' must be a data.frame.")
+  if (!is.data.frame(df) || ncol(df) != 3)
+    stop("'df' must be a data.frame with three columns: 1st 'Date', 2nd observed or reference data and 3rd estimated values.")
 
-  colnames(df) <- tolower(colnames(df))
-  req_cols <- colnames(df)
-  if (!all(req_cols %in% names(df)) || ncol(df) != 3)
-    stop("Input data.frame must contain exactly three columns named 'Date', 'obs' and 'est'.")
+  colnames(df) <- c("date", "obs", "est")
   if (!is.numeric(df$obs)) stop("'obs' must be numeric.")
   if (!is.numeric(df$est)) stop("'est' must be numeric.")
   if (!is.function(FUN)) stop("'FUN' must be a function.")
