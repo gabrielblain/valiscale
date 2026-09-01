@@ -4,34 +4,23 @@
 \alias{agreement_stats}
 \title{Calculate Agreement Statistics Between Observed and Estimated Values}
 \usage{
-agreement_stats(
-  df,
-  by_year = FALSE,
-  by_season = FALSE,
-  by_month = FALSE,
-  by_period = FALSE,
-  digits = 2
-)
+agreement_stats(df, by = NULL, digits = 2)
 }
 \arguments{
-\item{df}{A data.frame containing at least the columns \code{obs} and \code{est}.}
+\item{df}{A data.frame containing exactly seven columns:
+\code{year}, \code{season}, \code{season-year}, \code{month},
+\code{period}, \code{obs}, and \code{est}.}
 
-\item{by_year}{Logical. If TRUE, statistics are calculated separately for
-each year. Default is FALSE.}
+\item{by}{Character. Grouping level for calculating statistics. Must be one
+of \code{"year"}, \code{"season"}, \code{"month"}, or \code{"period"}.
+If \code{NULL} (default), statistics are calculated for the complete
+dataset.}
 
-\item{by_season}{Logical. If TRUE, statistics are calculated separately for
-each season. Default is FALSE.}
-
-\item{by_month}{Logical. If TRUE, statistics are calculated separately for
-each month. Default is FALSE.}
-
-\item{by_period}{Logical. If TRUE, statistics are calculated separately for
-each period. Default is FALSE.}
-
-\item{digits}{Integer. Number of decimal places to round the output statistics. Default is 2.}
+\item{digits}{Integer. Number of decimal places to round the output
+statistics. Default is 2.}
 }
 \value{
-A data.frame containing the chosen grouping columns followed by:
+A data.frame containing the chosen grouping column followed by:
 \itemize{
 \item \code{N} — number of paired observations
 \item \code{ME} — Mean Error (bias; est - obs)
@@ -43,16 +32,16 @@ A data.frame containing the chosen grouping columns followed by:
 \item \code{rRMSE} — Relative Root Mean Squared Error (scaled by mean observed value, \%)
 \item \code{PBIAS} — Percent Bias (\%)
 \item \code{NSE} — Nash–Sutcliffe Efficiency coefficient
-\item \code{d} — Willmott’s Index of Agreement (original formulation)
-\item \code{d_mod} — Modified Willmott’s Index of Agreement
+\item \code{d} — Willmott's Index of Agreement (original formulation)
+\item \code{d_mod} — Modified Willmott's Index of Agreement
 \item \code{R2} — Coefficient of determination (squared correlation)
 }
 }
 \description{
 Calculates agreement and performance statistics for paired observed and
 estimated values. The function is designed to work directly with the output
-of \code{\link{aggregate_scale}}, allowing tracking across years, months, periods,
-or any multi-variate combination of them.
+of \code{\link{aggregate_scale}}, allowing statistics to be calculated
+overall or separately by year, season, month, or period.
 }
 \examples{
 df <- data.frame(
@@ -60,8 +49,22 @@ df <- data.frame(
   obs = rnorm(9496, mean = 20, sd = 3),
   est = rnorm(9496, mean = 20, sd = 3)
 )
+
 testing_data <- aggregate_scale(df, scale = "daily", FUN = mean)
-agreement_stats(df=testing_data,
-by_year = TRUE)
+
+# Overall statistics
+agreement_stats(testing_data)
+
+# Statistics by year
+agreement_stats(testing_data, by = "year")
+
+# Statistics by season
+agreement_stats(testing_data, by = "season")
+
+# Statistics by month
+agreement_stats(testing_data, by = "month")
+
+# Statistics by period
+agreement_stats(testing_data, by = "period")
 
 }
