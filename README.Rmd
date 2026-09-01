@@ -80,11 +80,11 @@ Now let's evaluate model performance across different time scales using the aggr
 
 ```{r agreement mean}
 #Performance for daily values:
-agreement_stats(df=daily_data)
+agreement_stats(df=daily_data, by = "period")
 #Performance for pentad values:
-agreement_stats(df=pentad_means)
+agreement_stats(df=pentad_means, by = "period")
 #Performance for seasonal values (Austral seasons: DJF, MAM, JJA, SON):
-agreement_stats(df=seasonal_means)
+agreement_stats(df=seasonal_means, by = "period")
 ```
 
 ## Example 4
@@ -93,11 +93,11 @@ Overall stats are great, but let's see if model performance varies across differ
 
 ```{r agreement mean-seasons}
 #Seasonal performance for daily values in the:
-agreement_stats(df=daily_data, by_season = TRUE)
+agreement_stats(df=daily_data, by = "season")
 #Seasonal performance for pentad values:
-agreement_stats(df=pentad_means, by_season = TRUE)
+agreement_stats(df=pentad_means, by = "season")
 #Seasonal performance for seasonal values (Austral seasons: DJF, MAM, JJA, SON):
-agreement_stats(df=seasonal_means, by_season = TRUE)
+agreement_stats(df=seasonal_means, by = "season")
 ```
 
 ## Example 5
@@ -106,11 +106,11 @@ Great. Let's see if model performance varies across different months:
 
 ```{r agreement mean-month}
 # Monthly performance for daily values
-agreement_stats(df = daily_data, by_month = TRUE)
+agreement_stats(df = daily_data, by = "month")
 # Monthly performance for pentad values (5-day averages)
-agreement_stats(df = pentad_means, by_month = TRUE)
+agreement_stats(df = pentad_means, by = "month")
 # Monthly performance for seasonal values
 # Note: Since seasonal values are already aggregated into 3-month blocks,
 # attempting to compute monthly stats here will (correctly) throw an error/warning.
-agreement_stats(df = seasonal_means, by_month = TRUE)
+try(agreement_stats(df = seasonal_means, by = "month"))
 ```
