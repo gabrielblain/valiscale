@@ -60,9 +60,7 @@
 agreement_stats <- function(df, by = NULL, digits = 2) {
 
   # -----------------------------
-
   # Basic Validation
-
   # -----------------------------
 
   if (!is.data.frame(df)) {
@@ -82,11 +80,8 @@ agreement_stats <- function(df, by = NULL, digits = 2) {
       "'year', 'season', 'season-year', 'month', 'period', 'obs', and 'est'."
     )
   }
-
   # -----------------------------
-
   # Validate Grouping Argument
-
   # -----------------------------
 
   if (!is.null(by)) {
@@ -97,20 +92,15 @@ agreement_stats <- function(df, by = NULL, digits = 2) {
   }
 
   # -----------------------------
-
   # Validate digits
-
   # -----------------------------
 
   if (!is.numeric(digits) || length(digits) != 1 ||
       is.na(digits) || digits < 0 || digits != as.integer(digits)) {
     stop("'digits' must be a single non-negative integer.")
   }
-
   # -----------------------------
-
   # Internal Calculation Engine
-
   # -----------------------------
 
   .calc_stats <- function(x) {
