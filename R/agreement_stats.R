@@ -294,16 +294,29 @@ agreement_stats <- function(df, by = NULL, digits = 2) {
       drop = FALSE
     ]
 
-    order_args <- lapply(
-      group_cols,
-      function(col) output[[col]]
-    )
+    # Order output by grouping variable
+    if (identical(by, "month") &&
+        all(grepl("^[0-9]+$", output$month))) {
 
-    output <- output[
-      do.call(order, order_args),
-      ,
-      drop = FALSE
-    ]
+      output <- output[
+        order(as.numeric(output$month)),
+        ,
+        drop = FALSE
+      ]
+
+    } else {
+
+      order_args <- lapply(
+        group_cols,
+        function(col) output[[col]]
+      )
+
+      output <- output[
+        do.call(order, order_args),
+        ,
+        drop = FALSE
+      ]
+    }
 
     rownames(output) <- NULL
 
