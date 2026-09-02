@@ -354,7 +354,7 @@ agreement_stats <- function(df, by = NULL, digits = 2) {
 
       stop(
         "Insufficient data overall (fewer than 2 observations) ",
-        "to calculate agreement statistics."
+        "to calculate agreement statistics. Use by = NULL instead."
       )
     }
 
