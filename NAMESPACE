@@ -19,6 +19,8 @@ importFrom(lubridate,
   year
 )
 importFrom(stats,
+  lm,
   median,
-  na.omit
+  na.omit,
+  predict
 )

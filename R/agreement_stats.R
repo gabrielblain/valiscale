@@ -20,6 +20,7 @@
 #'   \item \code{N} — number of paired observations
 #'   \item \code{ME} — Mean Error (bias; est - obs)
 #'   \item \code{MAE} — Mean Absolute Error
+#'   \item \code{MSE} — Mean Squared Error
 #'   \item \code{RMSE} — Root Mean Squared Error
 #'   \item \code{MaxAE} — Maximum Absolute Error
 #'   \item \code{rME} — Relative Mean Error (scaled by mean observed value, %)
@@ -29,7 +30,10 @@
 #'   \item \code{NSE} — Nash–Sutcliffe Efficiency coefficient
 #'   \item \code{d} — Willmott's Index of Agreement (original formulation)
 #'   \item \code{d_mod} — Modified Willmott's Index of Agreement
+#'   \item \code{R} — Pearson's coefficient of correlation
 #'   \item \code{R2} — Coefficient of determination (squared correlation)
+#'   \item \code{MAEs} — Systematic part of Mean Absolute Error
+#'   \item \code{MAEu} — Unsystematic part of Mean Absolute Error
 #' }
 #'
 #' @examples
@@ -56,6 +60,7 @@
 #' # Statistics by period
 #' agreement_stats(testing_data, by = "period")
 #'
+#' @importFrom stats lm predict
 #' @export
 agreement_stats <- function(df, by = NULL, digits = 2) {
 
@@ -118,79 +123,254 @@ agreement_stats <- function(df, by = NULL, digits = 2) {
     err   <- est - obs
     ME    <- mean(err)
     MAE   <- mean(abs(err))
-    RMSE  <- sqrt(mean(err^2))
+    MSE   <- mean(err^2)
+    RMSE  <- sqrt(MSE)
     MaxAE <- max(abs(err))
 
     mean_obs <- mean(obs)
 
+    # -----------------------------
+    # Relative statistics
+    # -----------------------------
+
     if (mean_obs == 0) {
+
       rME   <- NA_real_
       rMAE  <- NA_real_
+      rMSE  <- NA_real_
       rRMSE <- NA_real_
+
     } else {
+
       rME   <- 100 * ME   / mean_obs
       rMAE  <- 100 * MAE  / mean_obs
+      rMSE  <- 100 * MSE  / mean_obs
       rRMSE <- 100 * RMSE / mean_obs
+
     }
+
+    # -----------------------------
+    # PBIAS
+    # -----------------------------
 
     PBIAS <- if (sum(obs) == 0) {
+
       NA_real_
+
     } else {
+
       100 * sum(est - obs) / sum(obs)
+
     }
 
-    R2 <- stats::cor(obs, est)^2
+    # -----------------------------
+    # Correlation
+    # -----------------------------
+
+    R <- stats::cor(obs, est)
+    R2 <- R^2
+
+    # -----------------------------
+    # Nash-Sutcliffe Efficiency
+    # -----------------------------
 
     den_nse <- sum((obs - mean_obs)^2)
 
     NSE <- if (den_nse == 0) {
+
       NA_real_
+
     } else {
+
       1 - sum((obs - est)^2) / den_nse
+
     }
 
+    # -----------------------------
+    # Willmott's index of agreement
+    # -----------------------------
+
     den_d <- sum(
-      (abs(est - mean_obs) + abs(obs - mean_obs))^2
+      (abs(est - mean_obs) +
+         abs(obs - mean_obs))^2
     )
 
     d <- if (den_d == 0) {
+
       NA_real_
+
     } else {
+
       1 - sum((obs - est)^2) / den_d
+
     }
 
+    # -----------------------------
+    # Modified index of agreement
+    # -----------------------------
+
     den_dm <- sum(
-      abs(est - mean_obs) + abs(obs - mean_obs)
+      abs(est - mean_obs) +
+        abs(obs - mean_obs)
     )
 
     d_mod <- if (den_dm == 0) {
+
       NA_real_
+
     } else {
+
       1 - sum(abs(obs - est)) / den_dm
+
     }
+
+    # ==========================================================
+    # Robeson & Willmott (2023) MAE decomposition
+    # ==========================================================
+
+    # Ordinary least-squares regression:
+    #
+    #   P_hat_i = a + b O_i
+    #
+    # where P = est and O = obs.
+
+    coef_lr <- stats::lm(est ~ obs)
+
+    P_hat <- stats::predict(coef_lr)
+
+    # -----------------------------
+    # Bias
+    # -----------------------------
+
+    # MBE = mean(P) - mean(O)
+    MBE <- mean(est) - mean(obs)
+
+    # Bias-corrected predictions:
+    #
+    # P'_i = P_i - MBE
+
+    P_prime <- est - MBE
+
+    # Bias-corrected regression values:
+    #
+    # P_hat'_i = P_hat_i - MBE
+
+    P_hat_prime <- P_hat - MBE
+
+    # -----------------------------
+    # Weights
+    # -----------------------------
+
+    # Bias weight:
+    #
+    # b = |MBE|
+
+    b_weight <- abs(MBE)
+
+    # Proportionality weight:
+    #
+    # p_i = |P_hat'_i - O_i|
+
+    p_weight <- abs(P_hat_prime - obs)
+
+    # Unsystematic weight:
+    #
+    # u_i = |P'_i - P_hat'_i|
+    #
+    # For OLS, this is equivalent to:
+    #
+    # u_i = |P_i - P_hat_i|
+
+    u_weight <- abs(P_prime - P_hat_prime)
+
+    # -----------------------------
+    # Total weight
+    # -----------------------------
+
+    total_weight <- b_weight +
+      p_weight +
+      u_weight
+
+    # -----------------------------
+    # Individual absolute error
+    # -----------------------------
+
+    abs_error <- abs(est - obs)
+
+    # -----------------------------
+    # Robeson & Willmott MAE
+    # components
+    # -----------------------------
+
+    # When total_weight == 0, the corresponding
+    # absolute error is necessarily zero.
+    #
+    # Therefore, these observations contribute
+    # zero to all three components.
+
+    valid_weight <- total_weight > 0
+
+    bias_component <- numeric(N)
+    prop_component <- numeric(N)
+    unsyst_component <- numeric(N)
+
+    bias_component[valid_weight] <-
+      (b_weight /
+         total_weight[valid_weight]) *
+      abs_error[valid_weight]
+
+    prop_component[valid_weight] <-
+      (p_weight[valid_weight] /
+         total_weight[valid_weight]) *
+      abs_error[valid_weight]
+
+    unsyst_component[valid_weight] <-
+      (u_weight[valid_weight] /
+         total_weight[valid_weight]) *
+      abs_error[valid_weight]
+
+    # -----------------------------
+    # Mean components
+    # -----------------------------
+
+    MAEb <- mean(bias_component)
+    MAEp <- mean(prop_component)
+    MAEu <- mean(unsyst_component)
+
+    # Systematic contribution
+    MAEs <- MAEb + MAEp
+
+    # -----------------------------
+    # Return statistics
+    # -----------------------------
 
     data.frame(
       N = N,
       ME = ME,
       MAE = MAE,
+      MSE = MSE,
       RMSE = RMSE,
       MaxAE = MaxAE,
       rME = rME,
       rMAE = rMAE,
+      rMSE = rMSE,
       rRMSE = rRMSE,
       PBIAS = PBIAS,
       NSE = NSE,
       d = d,
       d_mod = d_mod,
-      R2 = R2
+      R = R,
+      R2 = R2,
+      MAEb = MAEb,
+      MAEp = MAEp,
+      MAEu = MAEu,
+      MAEs = MAEs
     )
 
   }
 
   # -----------------------------
-
   # Determine Grouping Column
-
   # -----------------------------
 
   group_cols <- if (is.null(by)) {
@@ -200,9 +380,7 @@ agreement_stats <- function(df, by = NULL, digits = 2) {
   }
 
   # -----------------------------
-
   # Aggregation Scale Safety Checks
-
   # -----------------------------
 
   seasonal_labels <- c(
@@ -232,13 +410,10 @@ agreement_stats <- function(df, by = NULL, digits = 2) {
   }
 
   # -----------------------------
-
   # Execution Path
-
   # -----------------------------
 
   if (length(group_cols) > 0) {
-
 
     sub_sets <- split(
       df,
@@ -265,17 +440,36 @@ agreement_stats <- function(df, by = NULL, digits = 2) {
 
     # Sparse data safety net
     if (is.null(output) || nrow(output) == 0) {
+
       stop(
         "The requested grouping contains insufficient data ",
         "(fewer than 2 observations per group) to calculate ",
         "agreement statistics."
       )
+
     }
 
     stat_cols <- c(
-      "N", "ME", "MAE", "RMSE", "MaxAE",
-      "rME", "rMAE", "rRMSE", "PBIAS",
-      "NSE", "d", "d_mod", "R2"
+      "N",
+      "ME",
+      "MAE",
+      "MSE",
+      "RMSE",
+      "MaxAE",
+      "rME",
+      "rMAE",
+      "rMSE",
+      "rRMSE",
+      "PBIAS",
+      "NSE",
+      "d",
+      "d_mod",
+      "R",
+      "R2",
+      "MAEb",
+      "MAEp",
+      "MAEu",
+      "MAEs"
     )
 
     output <- output[
@@ -284,21 +478,44 @@ agreement_stats <- function(df, by = NULL, digits = 2) {
       drop = FALSE
     ]
 
-    order_args <- lapply(
-      group_cols,
-      function(col) output[[col]]
-    )
+    # -----------------------------
+    # Order output by grouping variable
+    # -----------------------------
 
-    output <- output[
-      do.call(order, order_args),
-      ,
-      drop = FALSE
-    ]
+    if (identical(by, "month") &&
+        all(grepl("^[0-9]+$", output$month))) {
+
+      output <- output[
+        order(as.numeric(output$month)),
+        ,
+        drop = FALSE
+      ]
+
+    } else {
+
+      order_args <- lapply(
+        group_cols,
+        function(col) output[[col]]
+      )
+
+      output <- output[
+        do.call(order, order_args),
+        ,
+        drop = FALSE
+      ]
+
+    }
 
     rownames(output) <- NULL
 
-    # Safe base R rounding for numeric columns only
-    num_cols <- sapply(output, is.numeric)
+    # -----------------------------
+    # Safe base R rounding
+    # -----------------------------
+
+    num_cols <- sapply(
+      output,
+      is.numeric
+    )
 
     output[num_cols] <- round(
       output[num_cols],
@@ -307,9 +524,7 @@ agreement_stats <- function(df, by = NULL, digits = 2) {
 
     return(output)
 
-
   } else {
-
 
     overall_out <- .calc_stats(df)
 
@@ -331,12 +546,12 @@ agreement_stats <- function(df, by = NULL, digits = 2) {
 
       stop(
         "Insufficient data overall (fewer than 2 observations) ",
-        "to calculate agreement statistics."
+        "to calculate agreement statistics. Use by = NULL instead."
       )
+
     }
 
     return(overall_out)
-
 
   }
 }

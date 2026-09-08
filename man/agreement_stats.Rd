@@ -25,6 +25,7 @@ A data.frame containing the chosen grouping column followed by:
 \item \code{N} — number of paired observations
 \item \code{ME} — Mean Error (bias; est - obs)
 \item \code{MAE} — Mean Absolute Error
+\item \code{MSE} — Mean Squared Error
 \item \code{RMSE} — Root Mean Squared Error
 \item \code{MaxAE} — Maximum Absolute Error
 \item \code{rME} — Relative Mean Error (scaled by mean observed value, \%)
@@ -34,7 +35,10 @@ A data.frame containing the chosen grouping column followed by:
 \item \code{NSE} — Nash–Sutcliffe Efficiency coefficient
 \item \code{d} — Willmott's Index of Agreement (original formulation)
 \item \code{d_mod} — Modified Willmott's Index of Agreement
+\item \code{R} — Pearson's coefficient of correlation
 \item \code{R2} — Coefficient of determination (squared correlation)
+\item \code{MAEs} — Systematic part of Mean Absolute Error
+\item \code{MAEu} — Unsystematic part of Mean Absolute Error
 }
 }
 \description{
