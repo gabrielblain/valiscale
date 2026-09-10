@@ -22,5 +22,6 @@ importFrom(stats,
   lm,
   median,
   na.omit,
-  predict
+  predict,
+  sd
 )

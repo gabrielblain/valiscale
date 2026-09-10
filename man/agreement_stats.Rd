@@ -37,6 +37,9 @@ A data.frame containing the chosen grouping column followed by:
 \item \code{d_mod} — Modified Willmott's Index of Agreement
 \item \code{R} — Pearson's coefficient of correlation
 \item \code{R2} — Coefficient of determination (squared correlation)
+\item \code{KGE} — Kling–Gupta efficiency coefficient
+\item \code{AlfaKGE} — Kling–Gupta alfa component
+\item \code{BetaKGE} — Kling–Gupta beta component
 \item \code{MAEs} — Systematic part of Mean Absolute Error
 \item \code{MAEu} — Unsystematic part of Mean Absolute Error
 }

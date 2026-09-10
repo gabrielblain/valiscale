@@ -32,6 +32,9 @@
 #'   \item \code{d_mod} — Modified Willmott's Index of Agreement
 #'   \item \code{R} — Pearson's coefficient of correlation
 #'   \item \code{R2} — Coefficient of determination (squared correlation)
+#'   \item \code{KGE} — Kling–Gupta efficiency coefficient
+#'   \item \code{AlfaKGE} — Kling–Gupta alfa component
+#'   \item \code{BetaKGE} — Kling–Gupta beta component
 #'   \item \code{MAEs} — Systematic part of Mean Absolute Error
 #'   \item \code{MAEu} — Unsystematic part of Mean Absolute Error
 #' }
@@ -60,7 +63,7 @@
 #' # Statistics by period
 #' agreement_stats(testing_data, by = "period")
 #'
-#' @importFrom stats lm predict
+#' @importFrom stats lm predict sd
 #' @export
 agreement_stats <- function(df, by = NULL, digits = 2) {
 
@@ -341,6 +344,15 @@ agreement_stats <- function(df, by = NULL, digits = 2) {
     MAEs <- MAEb + MAEp
 
     # -----------------------------
+    # Kling–Gupta efficiency
+    # -----------------------------
+
+    alfa <- sd(est)/sd(obs)
+    beta <- mean(est)/mean(obs)
+    ED <- sqrt((R-1)^2 + (alfa-1)^2 + (beta-1)^2)
+    KGE <- 1 - ED
+
+    # -----------------------------
     # Return statistics
     # -----------------------------
 
@@ -364,7 +376,10 @@ agreement_stats <- function(df, by = NULL, digits = 2) {
       MAEb = MAEb,
       MAEp = MAEp,
       MAEu = MAEu,
-      MAEs = MAEs
+      MAEs = MAEs,
+      KGE = KGE,
+      alfa = alfa,
+      beta = beta
     )
 
   }
@@ -469,7 +484,10 @@ agreement_stats <- function(df, by = NULL, digits = 2) {
       "MAEb",
       "MAEp",
       "MAEu",
-      "MAEs"
+      "MAEs",
+      "KGE",
+      "alfa",
+      "beta"
     )
 
     output <- output[
