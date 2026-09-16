@@ -27,7 +27,7 @@ A data.frame containing
 \itemize{
 \item Year
 \item Season
-\item "Season-Year"
+\item "SeasonYear"
 \item Month
 \item Period
 \item obs

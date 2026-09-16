@@ -8,7 +8,7 @@ agreement_stats(df, by = NULL, digits = 2)
 }
 \arguments{
 \item{df}{A data.frame containing exactly seven columns:
-\code{year}, \code{season}, \code{season-year}, \code{month},
+\code{year}, \code{season}, \code{seasonyear}, \code{month},
 \code{period}, \code{obs}, and \code{est}.}
 
 \item{by}{Character. Grouping level for calculating statistics. Must be one

@@ -6,7 +6,7 @@
 #' overall or separately by year, season, month, or period.
 #'
 #' @param df A data.frame containing exactly seven columns:
-#'   \code{year}, \code{season}, \code{season-year}, \code{month},
+#'   \code{year}, \code{season}, \code{seasonyear}, \code{month},
 #'   \code{period}, \code{obs}, and \code{est}.
 #' @param by Character. Grouping level for calculating statistics. Must be one
 #'   of \code{"year"}, \code{"season"}, \code{"month"}, or \code{"period"}.
@@ -78,14 +78,14 @@ agreement_stats <- function(df, by = NULL, digits = 2) {
   colnames(df) <- tolower(colnames(df))
 
   required_cols <- c(
-    "year", "season", "season-year",
+    "year", "season", "seasonyear",
     "month", "period", "obs", "est"
   )
 
   if (ncol(df) != 7 || !all(required_cols %in% names(df))) {
     stop(
       "Input data.frame must contain exactly seven columns named ",
-      "'year', 'season', 'season-year', 'month', 'period', 'obs', and 'est'."
+      "'year', 'season', 'seasonyear', 'month', 'period', 'obs', and 'est'."
     )
   }
   # -----------------------------

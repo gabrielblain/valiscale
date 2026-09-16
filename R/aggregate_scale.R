@@ -28,7 +28,7 @@
 #' \itemize{
 #'   \item Year
 #'   \item Season
-#'   \item "Season-Year"
+#'   \item "SeasonYear"
 #'   \item Month
 #'   \item Period
 #'   \item obs
@@ -181,8 +181,8 @@ aggregate_scale <- function(df,
       TRUE                              ~ "Spring"
     )
 
-    output$`Season-Year` <- output$Year
-    output$`Season-Year`[output$Month_mid == 12] <- output$`Season-Year`[output$Month_mid == 12] + 1
+    output$SeasonYear <- output$Year
+    output$SeasonYear[output$Month_mid == 12] <- output$SeasonYear[output$Month_mid == 12] + 1
 
   } else if (scale == "seasonal") {
 
@@ -192,19 +192,19 @@ aggregate_scale <- function(df,
                       "Winter" = "Jun-Aug",
                       "Spring" = "Sep-Nov")[output$Season]
 
-    output$`Season-Year` <- output$SeasonYear # Comes directly from 'groups'
+    output$SeasonYear <- output$SeasonYear # Comes directly from 'groups'
 
   } else if (scale == "yearly") {
 
     output$Season <- 1
-    output$`Season-Year` <- output$Year
+    output$SeasonYear <- output$Year
     output$Month <- "1-12"
     output$Period <- 1
 
   }
 
   # Ensure the output is a standard data.frame and rigidly select/order the requested columns
-  final_cols <- c("Year", "Season", "Season-Year", "Month", "Period", "obs", "est")
+  final_cols <- c("Year", "Season", "SeasonYear", "Month", "Period", "obs", "est")
   output <- as.data.frame(output)[, final_cols]
 
   return(output)
