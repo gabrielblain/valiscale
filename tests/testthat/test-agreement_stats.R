@@ -212,7 +212,7 @@ test_that("agreement_stats calculates relative statistics correctly", {
 
   expect_equal(
     result$rMSE,
-    100 * MSE / mean_obs
+    100 * MSE / (mean_obs^2)
   )
 
   expect_equal(

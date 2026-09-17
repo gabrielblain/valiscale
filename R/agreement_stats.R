@@ -147,7 +147,7 @@ agreement_stats <- function(df, by = NULL, digits = 2) {
 
       rME   <- 100 * ME   / mean_obs
       rMAE  <- 100 * MAE  / mean_obs
-      rMSE  <- 100 * MSE  / mean_obs
+      rMSE  <- 100 * MSE  / (mean_obs^2)
       rRMSE <- 100 * RMSE / mean_obs
 
     }
